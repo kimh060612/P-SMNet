@@ -9,7 +9,7 @@ sys.path.append('../metric/')
 from metric.iou import IoU
 
 sys.path.append('../utils/')
-from semantic_utils import object_whitelist
+from utils.semantic_utils import object_whitelist
 
 split = 'test'
 dataset = 'replica'

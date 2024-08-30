@@ -7,7 +7,7 @@ from tqdm import tqdm
 from multiprocessing import Pool
 
 sys.path.append('../utils/')
-from semantic_utils import object_whitelist
+from utils.semantic_utils import object_whitelist
 
 
 from bfscore import bfscore
