@@ -15,4 +15,10 @@ class SemmapLoss(nn.Module):
         loss = loss.sum()/mask.sum()
         return loss
 
-
+class PSEMMapLoss(nn.Module):
+    def __init__(self):
+        super(PSEMMapLoss, self).__init__()
+        
+    def forward(self):
+        
+        pass
