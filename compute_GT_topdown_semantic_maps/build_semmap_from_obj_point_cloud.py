@@ -94,7 +94,6 @@ for obj_f in tqdm(obj_files):
 
     obj_ids = obj_ids[~outside_map_indices]
     sem_ids = sem_ids[~outside_map_indices]
-    print(obj_ids.shape)
 
     # -- get the z values for projection
     # -- shift to positive values
@@ -115,6 +114,8 @@ for obj_f in tqdm(obj_files):
     )
 
     m = (argmax_flat_spatial_map>=0)
+    print(obj_ids.shape)
+    print(argmax_flat_spatial_map[m])
     flat_map_instance = torch.zeros(int(world_dim_discret[0] * world_dim_discret[2])) - 1
     flat_map_instance[m.view(-1)] = obj_ids[argmax_flat_spatial_map[m]]
 
