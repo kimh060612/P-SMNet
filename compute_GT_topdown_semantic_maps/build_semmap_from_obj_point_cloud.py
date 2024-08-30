@@ -94,7 +94,7 @@ for obj_f in tqdm(obj_files):
 
     obj_ids = obj_ids[~outside_map_indices]
     sem_ids = sem_ids[~outside_map_indices]
-
+    print(obj_ids.shape)
 
     # -- get the z values for projection
     # -- shift to positive values
