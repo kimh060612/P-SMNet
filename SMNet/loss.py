@@ -27,7 +27,7 @@ class SemmapLoss(nn.Module):
     
 class AuxSemmapLoss(nn.Module):
     def __init__(self, beta=0.1):
-        super(SemmapLoss, self).__init__()
+        super(AuxSemmapLoss, self).__init__()
         self.loss = nn.CrossEntropyLoss(reduction='none')
         self.mse_loss = nn.MSELoss(reduction='none')
         self.beta = beta
