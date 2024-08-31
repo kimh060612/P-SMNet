@@ -655,16 +655,8 @@ def train_psmnet(rank, world_size, cfg):
         obj_running_metrics_val.reset()
         obj_running_metrics.reset()
 
-        scheduler.step(epoch)
+        scheduler.step(epoch)    
 
-
-def train(rank, world_size, cfg):
-
-    if cfg['model'] == "psmnet":
-        train_psmnet(rank, world_size, cfg)
-    if cfg['model'] == "smnet":
-        train_smnet(rank, world_size, cfg)
-    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="config")
@@ -697,7 +689,13 @@ if __name__ == "__main__":
     Path(chkptdir).mkdir(parents=True, exist_ok=True)
 
     world_size=8
-    mp.spawn(train,
-             args=(world_size, cfg),
-             nprocs=world_size,
-             join=True)
+    if cfg['model'] == "smnet":
+        mp.spawn(train_smnet,
+                args=(world_size, cfg),
+                nprocs=world_size,
+                join=True)
+    elif cfg['model'] == "psmnet":
+        mp.spawn(train_psmnet,
+                args=(world_size, cfg),
+                nprocs=world_size,
+                join=True)
