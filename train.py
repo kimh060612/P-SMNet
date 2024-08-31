@@ -689,13 +689,13 @@ if __name__ == "__main__":
     Path(chkptdir).mkdir(parents=True, exist_ok=True)
 
     world_size=8
-    if cfg['model'] == "smnet":
-        train_smnet(0, world_size, cfg)
-        # mp.spawn(train_smnet,
-        #         args=(world_size, cfg),
-        #         nprocs=world_size,
-        #         join=True)
-    elif cfg['model'] == "psmnet":
+    if cfg['model']['arch'] == "smnet":
+        # train_smnet(0, world_size, cfg)
+        mp.spawn(train_smnet,
+                args=(world_size, cfg),
+                nprocs=world_size,
+                join=True)
+    elif cfg['model']['arch'] == "psmnet":
         mp.spawn(train_psmnet,
                 args=(world_size, cfg),
                 nprocs=world_size,
