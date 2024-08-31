@@ -688,12 +688,13 @@ if __name__ == "__main__":
     print("CHECKPOINTDIR: {}".format(chkptdir))
     Path(chkptdir).mkdir(parents=True, exist_ok=True)
 
-    world_size=1
+    world_size=8
     if cfg['model'] == "smnet":
-        mp.spawn(train_smnet,
-                args=(world_size, cfg),
-                nprocs=world_size,
-                join=True)
+        train_smnet(0, world_size, cfg)
+        # mp.spawn(train_smnet,
+        #         args=(world_size, cfg),
+        #         nprocs=world_size,
+        #         join=True)
     elif cfg['model'] == "psmnet":
         mp.spawn(train_psmnet,
                 args=(world_size, cfg),
