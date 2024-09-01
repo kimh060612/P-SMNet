@@ -423,7 +423,7 @@ class SemmapDecoder(nn.Module):
                                    nn.BatchNorm2d(48),
                                    nn.ReLU(inplace=True),
                                   )
-        self.res_block = Res_block(in_channels=48, red_channels=64, out_channels=48)
+        self.res_block = Res_block(in_channels=48, red_channels=32, out_channels=48)
         self.obj_layer = nn.Sequential(nn.Conv2d(48, 48, kernel_size=3, stride=1, padding=1, bias=False),
                                        nn.BatchNorm2d(48),
                                        nn.ReLU(inplace=True),
