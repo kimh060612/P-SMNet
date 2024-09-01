@@ -357,9 +357,9 @@ class SMNet(nn.Module):
 
 
 
-class Conv_block(nn.Module):
+class CNNBlock(nn.Module):
     def __init__(self, in_channels, out_channels, activation=True, **kwargs) -> None:
-        super(Conv_block, self).__init__()
+        super(CNNBlock, self).__init__()
         self.relu = nn.ReLU()
         self.conv = nn.Conv2d(in_channels, out_channels, **kwargs) # kernel size = ...
         self.batchnorm = nn.BatchNorm2d(out_channels)
@@ -378,23 +378,23 @@ class Res_block(nn.Module):
         
         if in_channels==64:
             self.convseq = nn.Sequential(
-                                    Conv_block(in_channels, red_channels, kernel_size=1, padding=0),
-                                    Conv_block(red_channels, red_channels, kernel_size=3, padding=1),
-                                    Conv_block(red_channels, out_channels, activation=False, kernel_size=1, padding=0)
+                                    CNNBlock(in_channels, red_channels, kernel_size=1, padding=0),
+                                    CNNBlock(red_channels, red_channels, kernel_size=3, padding=1),
+                                    CNNBlock(red_channels, out_channels, activation=False, kernel_size=1, padding=0)
             )
             self.iden = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1)
         elif in_channels == out_channels:
             self.convseq = nn.Sequential(
-                                    Conv_block(in_channels, red_channels, kernel_size=1, padding=0),
-                                    Conv_block(red_channels, red_channels, kernel_size=3, padding=1),
-                                    Conv_block(red_channels, out_channels, activation=False, kernel_size=1, padding=0)
+                                    CNNBlock(in_channels, red_channels, kernel_size=1, padding=0),
+                                    CNNBlock(red_channels, red_channels, kernel_size=3, padding=1),
+                                    CNNBlock(red_channels, out_channels, activation=False, kernel_size=1, padding=0)
             )
             self.iden = nn.Identity()
         else:
             self.convseq = nn.Sequential(
-                                    Conv_block(in_channels, red_channels, kernel_size=1, padding=0, stride=2),
-                                    Conv_block(red_channels, red_channels, kernel_size=3, padding=1),
-                                    Conv_block(red_channels, out_channels, activation=False, kernel_size=1, padding=0)
+                                    CNNBlock(in_channels, red_channels, kernel_size=1, padding=0, stride=2),
+                                    CNNBlock(red_channels, red_channels, kernel_size=3, padding=1),
+                                    CNNBlock(red_channels, out_channels, activation=False, kernel_size=1, padding=0)
                 
             )
             self.iden = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=2)
