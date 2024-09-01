@@ -35,7 +35,8 @@ class AuxSemmapLoss(nn.Module):
     def forward(self, obj_gt, obj_pred, mask):
         mask = mask.float()
         # print(obj_gt.shape, torch.argmax(obj_pred, dim=1, keepdim=True).shape)
-        loss = self.loss(obj_pred, obj_gt) + self.beta * self.mse_loss(torch.argmax(obj_pred, dim=1, keepdim=True).float(), obj_gt.float())
+        pred_ten = torch.argmax(obj_pred, dim=1, keepdim=True).float().squeeze(1)
+        loss = self.loss(obj_pred, obj_gt) + self.beta * self.mse_loss(pred_ten, obj_gt.float())
         loss = torch.mul(loss, mask)
         # -- mask is assumed to have a least one value
         loss = loss.sum()/mask.sum()
