@@ -423,7 +423,7 @@ class SemmapDecoder(nn.Module):
                                    nn.BatchNorm2d(48),
                                    nn.ReLU(inplace=True),
                                   )
-
+        self.res_block = Res_block(in_channels=48, red_channels=64, out_channels=48)
         self.obj_layer = nn.Sequential(nn.Conv2d(48, 48, kernel_size=3, stride=1, padding=1, bias=False),
                                        nn.BatchNorm2d(48),
                                        nn.ReLU(inplace=True),
@@ -434,7 +434,8 @@ class SemmapDecoder(nn.Module):
 
     def forward(self, memory):
         l1 = self.layer(memory)
-        out_obj = self.obj_layer(l1)
+        l1_res = self.res_block(l1)
+        out_obj = self.obj_layer(l1_res)
         return out_obj
 
 

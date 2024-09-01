@@ -1,6 +1,6 @@
 import os
 import sys
-import json
+import ujson as json
 import h5py
 import torch
 import numpy as np
@@ -34,7 +34,7 @@ vfov = vfov * np.pi / 180.0
 features_spatial_dimensions = (480,640)
 
 
-nb_samples_per_env = 50
+nb_samples_per_env = 10
 nb_frames_per_sample = 20
 
 paths = json.load(open('data/paths.json', 'r'))

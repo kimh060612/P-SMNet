@@ -188,6 +188,7 @@ def train_smnet(rank, world_size, cfg):
             if observed_masks.any():
 
                 loss = loss_fn(semmap_gt.to(device), semmap_pred, observed_masks)
+                loss += l2_regularisation(model.decoder) + l2_regularisation(model.rnn)
 
                 loss.backward()
 
@@ -670,7 +671,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     with open(args.config) as fp:
-        cfg = yaml.load(fp)
+        cfg = yaml.load(fp, Loader=yaml.FullLoader)
 
     name_expe = cfg['name_experiment']
 

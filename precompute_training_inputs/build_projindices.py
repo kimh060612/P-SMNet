@@ -78,7 +78,8 @@ def get_projections_indices(file):
 print(' Start collapsing projections indices (Projecting the pixel with highest height in case of collision.)')
 
 pool = Pool(40)
-res = pool.map(get_projections_indices, files) 
+res = list(tqdm(pool.imap(get_projections_indices, files), total=len(files)))
+# res = pool.map(get_projections_indices, files) 
 
 print(' -> Done')
 
