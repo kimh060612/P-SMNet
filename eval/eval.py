@@ -12,7 +12,7 @@ sys.path.append('../utils/')
 from utils.semantic_utils import object_whitelist
 
 split = 'test'
-dataset = 'replica'
+dataset = 'mp3d'
 
 
 object_whitelist = ['void'] + object_whitelist
