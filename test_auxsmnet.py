@@ -4,7 +4,7 @@ import h5py
 import torch
 import numpy as np
 
-from SMNet.model_test import SMNet, PSMNet
+from SMNet.model_test import AuxSMNet
 
 from utils import convert_weights_cuda_cpu
 
@@ -18,7 +18,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # -- create model
 cfg_model = {
-    'arch': 'psmnet',
+    'arch': 'auxsmnet',
     'finetune': False,
     'n_obj_classes': 13,
     'ego_feature_dim': 64,
@@ -26,8 +26,8 @@ cfg_model = {
     'mem_update': 'gru',
     'ego_downsample': False,
 }
-model_path = 'psmnet_mp3d_best_model.pkl'
-model = PSMNet(cfg_model, device)
+model_path = 'auxsmnet_mp3d_best_model.pkl'
+model = AuxSMNet(cfg_model, device)
 model = model.to(device)
 
 print('Loading pre-trained weights: ', model_path)
