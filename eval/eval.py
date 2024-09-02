@@ -1,14 +1,14 @@
 import os
-import sys
+# import sys
 import json
 import h5py
 import numpy as np
 from tqdm import tqdm
 
-sys.path.append('../metric/')
+# sys.path.append('../metric/')
 from metric.iou import IoU
 
-sys.path.append('../utils/')
+# sys.path.append('../utils/')
 from utils.semantic_utils import object_whitelist
 
 split = 'test'
