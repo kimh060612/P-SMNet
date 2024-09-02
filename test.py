@@ -5,7 +5,7 @@ import torch
 import numpy as np
 
 from SMNet.model_test import SMNet
-
+from tqdm import tqdm
 from utils import convert_weights_cuda_cpu
 
 split = 'test'
@@ -49,7 +49,7 @@ envs.sort()
 
 
 with torch.no_grad():
-    for env in envs:
+    for env in tqdm(envs):
 
         if os.path.isfile(os.path.join(output_dir, env+'.h5')): continue
 
