@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import tqdm
 import torchvision.transforms as transforms
 
-from SMNet.model_test import SMNet
+from SMNet.model_test import AuxSMNet
 
 from projector import _transform3D
 from projector.projector import Projector
@@ -173,7 +173,7 @@ del habitat, model_rednet, projector
 
 # -- create SMNet model
 cfg_model = {
-    'arch': 'smnet',
+    'arch': 'auxsmnet',
     'finetune': False,
     'n_obj_classes': 13,
     'ego_feature_dim': 64,
@@ -181,9 +181,9 @@ cfg_model = {
     'mem_update': 'gru',
     'ego_downsample': False,
 }
-model_path = 'smnet_mp3d_best_model.pkl'
+model_path = 'auxsmnet_mp3d_best_model.pkl'
 
-model = SMNet(cfg_model, device)
+model = AuxSMNet(cfg_model, device)
 model = model.to(device)
 
 print('Loading pre-trained weights: ', model_path)
@@ -233,8 +233,8 @@ with torch.no_grad():
     semmap_color = color_label(semmap)
     semmap_color = semmap_color.transpose(1,2,0)
     semmap_color = semmap_color.astype(np.uint8)
-
-    cv2.imwrite("map_viz/output_smnet.png", semmap_color)    
+    
+    cv2.imwrite("map_viz/output_aux.png", semmap_color)
     # import matplotlib.pyplot as plt 
     # plt.imshow(semmap_color)
     # plt.title('Topdown semantic map prediction')
