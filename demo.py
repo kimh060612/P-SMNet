@@ -188,8 +188,8 @@ for env in tqdm(envs):
             semfeat_lastlayer = semfeat_lastlayer.astype(np.float32)
             features_lastlayer[n,...] = semfeat_lastlayer
 
-    del habitat, model_rednet, projector
-    
+    del habitat, projector
+
     print('Run SMNet')
 
     with torch.no_grad():
