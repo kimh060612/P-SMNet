@@ -68,6 +68,7 @@ with h5py.File(filename, 'w') as f:
         gt_h5_file.close()
 
         pred_h5_file = h5py.File(os.path.join(pred_dir, file), 'r')
+        print(pred_h5_file.keys())
         if 'map_semantic' in pred_h5_file:
             pred_semmap = np.array(pred_h5_file['map_semantic'])
         else:
