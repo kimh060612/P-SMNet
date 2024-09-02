@@ -68,18 +68,18 @@ with h5py.File(filename, 'w') as f:
         gt_h5_file.close()
 
         pred_h5_file = h5py.File(os.path.join(pred_dir, file), 'r')
-        print(pred_h5_file.keys())
+        # print(pred_h5_file.keys())
         if 'map_semantic' in pred_h5_file:
             pred_semmap = np.array(pred_h5_file['map_semantic'])
         else:
             pred_semmap = np.array(pred_h5_file['semmap'])
-        pred_h5_file.close()
 
         # h5file = h5py.File(os.path.join(obsmaps_dir, file), 'r')
         observed_map = np.array(pred_h5_file['observed_map'])
         observed_map = observed_map.astype(np.bool)
         # h5file.close()
-
+        pred_h5_file.close()
+        
         obj_gt = gt_semmap[observed_map]
         obj_pred = pred_semmap[observed_map]
 
