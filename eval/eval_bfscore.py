@@ -8,9 +8,12 @@ from multiprocessing import Pool
 
 sys.path.append('../utils/')
 from utils.semantic_utils import object_whitelist
-
-
+import argparse
 from bfscore import bfscore
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-m", "--model", required=True, default="smnet", action="store")          # extra value
+args = parser.parse_args()
 
 split = 'test'
 dataset = 'replica'
@@ -18,15 +21,15 @@ dataset = 'replica'
 object_whitelist = ['void'] + object_whitelist
 
 if dataset == 'mp3d':
-    GT_dir = 'data/GT/semmap/'
-    obsmaps_dir = 'data/observed_masks'
+    GT_dir = 'data/semmap/'
+    obsmaps_dir = 'data/outputs/{}/'.format(args.model)
 elif dataset == 'replica':
     GT_dir = 'data/replica/semmap/'
     obsmaps_dir = 'data/replica/observed_masks'
 
 
 # -- select prediction dir
-pred_dir = 'data/replica/OUTPUTS/fullrez/SMNet_gru_lastlayer_m256/'
+pred_dir = 'data/outputs/{}/'.format(args.model)
 
 if dataset == 'mp3d':
     paths = json.load(open('data/paths.json', 'r'))
@@ -46,8 +49,8 @@ def compute_bfscore(env):
 
     file = env+'.h5'
 
-    if not os.path.isfile(os.path.join(pred_dir, 'semmap', file)):
-        return env, False,0,0,0,0
+    # if not os.path.isfile(os.path.join(pred_dir, 'semmap', file)):
+    #     return env, False,0,0,0,0
 
     gt_h5_file = h5py.File(os.path.join(GT_dir, file), 'r')
     gt_semmap = np.array(gt_h5_file['map_semantic']).astype(np.float)
@@ -60,10 +63,10 @@ def compute_bfscore(env):
         pred_semmap = np.array(pred_h5_file['semmap'])
     pred_h5_file.close()
 
-    h5file = h5py.File(os.path.join(obsmaps_dir, file), 'r')
-    observed_map = np.array(h5file['observed_map'])
+    # h5file = h5py.File(os.path.join(obsmaps_dir, file), 'r')
+    observed_map = np.array(pred_h5_file['observed_map'])
     observed_map = observed_map.astype(np.bool)
-    h5file.close()
+    # h5file.close()
 
     obj_gt = np.multiply(gt_semmap, observed_map)
     obj_gt = obj_gt.astype(np.uint8)
