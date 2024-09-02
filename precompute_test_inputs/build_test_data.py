@@ -15,7 +15,7 @@ from utils.habitat_utils import HabitatUtils
 from scipy.spatial.transform import Rotation as R
 
 
-output_dir = 'data/test_data/projections/'
+output_dir = 'data/training/test_data/projections/'
 os.makedirs(output_dir, exist_ok=True)
 
 device = torch.device('cuda')

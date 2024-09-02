@@ -18,7 +18,7 @@ from semseg.rednet import RedNet
 from utils import convert_weights_cuda_cpu
 
 
-output_dir = 'data/test_data/features/'
+output_dir = 'data/training/test_data/features/'
 os.makedirs(output_dir, exist_ok=True)
 
 device = torch.device('cuda')

@@ -10,7 +10,7 @@ from utils import convert_weights_cuda_cpu
 
 split = 'test'
 
-data_dir = 'data/test_data/'
+data_dir = 'data/training/test_data/'
 output_dir = 'data/outputs/semmap/'
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
