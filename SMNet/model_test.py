@@ -433,7 +433,7 @@ class SemmapDecoder(nn.Module):
 
 class AuxSMNet(nn.Module):
     def __init__(self, cfg, device):
-        super(SMNet, self).__init__()
+        super(AuxSMNet, self).__init__()
 
         ego_feat_dim = cfg['ego_feature_dim']
         mem_feat_dim = cfg['mem_feature_dim']
@@ -661,7 +661,7 @@ class Res_block(nn.Module):
 class AuxSemmapDecoder(nn.Module):
     def __init__(self, feat_dim, n_obj_classes):
 
-        super(SemmapDecoder, self).__init__()
+        super(AuxSemmapDecoder, self).__init__()
 
         self.layer = nn.Sequential(nn.Conv2d(feat_dim, 128, kernel_size=7, stride=1, padding=3, bias=False),
                                    nn.BatchNorm2d(128),
