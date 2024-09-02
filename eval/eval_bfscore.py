@@ -56,7 +56,7 @@ def compute_bfscore(env):
     gt_semmap = np.array(gt_h5_file['map_semantic']).astype(np.float)
     gt_h5_file.close()
 
-    pred_h5_file = h5py.File(os.path.join(pred_dir, 'semmap', file), 'r')
+    pred_h5_file = h5py.File(os.path.join(pred_dir, file), 'r')
     if 'map_semantic' in pred_h5_file:
         pred_semmap = np.array(pred_h5_file['map_semantic'])
     else:
