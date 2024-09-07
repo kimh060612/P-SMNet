@@ -33,7 +33,7 @@ class Encoder(nn.Module):
     A convolutional neural network, consisting of len(num_filters) times a block of no_convs_per_block convolutional layers,
     after each block a pooling operation is performed. And after each convolutional layer a non-linear (ReLU) activation function is applied.
     """
-    def __init__(self, input_channels, num_filters, no_convs_per_block, initializers, padding=True, posterior=False):
+    def __init__(self, input_channels, num_filters, no_convs_per_block, initializers, num_classes, padding=True, posterior=False):
         super(Encoder, self).__init__()
         self.contracting_path = nn.ModuleList()
         self.input_channels = input_channels
@@ -41,7 +41,7 @@ class Encoder(nn.Module):
 
         if posterior:
             #To accomodate for the mask that is concatenated at the channel axis, we increase the input_channels.
-            self.input_channels += 1
+            self.input_channels += num_classes
 
         layers = []
         for i in range(len(self.num_filters)):
@@ -70,12 +70,12 @@ class Encoder(nn.Module):
         output = self.layers(input)
         return output
 
-class AxisAlignedConvGaussian(nn.Module):
+class AxisAlignedGaussian(nn.Module):
     """
     A convolutional net that parametrizes a Gaussian distribution with axis aligned covariance matrix.
     """
-    def __init__(self, input_channels, num_filters, no_convs_per_block, latent_dim, initializers, posterior=False):
-        super(AxisAlignedConvGaussian, self).__init__()
+    def __init__(self, input_channels, num_filters, no_convs_per_block, latent_dim, initializers, num_classes, posterior=False):
+        super(AxisAlignedGaussian, self).__init__()
         self.input_channels = input_channels
         self.channel_axis = 1
         self.num_filters = num_filters
@@ -86,7 +86,7 @@ class AxisAlignedConvGaussian(nn.Module):
             self.name = 'Posterior'
         else:
             self.name = 'Prior'
-        self.encoder = Encoder(self.input_channels, self.num_filters, self.no_convs_per_block, initializers, posterior=self.posterior)
+        self.encoder = Encoder(self.input_channels, self.num_filters, self.no_convs_per_block, initializers, num_classes, posterior=self.posterior)
         self.conv_layer = nn.Conv2d(num_filters[-1], 2 * self.latent_dim, (1,1), stride=1)
         self.show_img = 0
         self.show_seg = 0
@@ -193,5 +193,5 @@ class Fcomb(nn.Module):
 
             #Concatenate the feature map (output of the UNet) and the sample taken from the latent space
             feature_map = torch.cat((feature_map, z), dim=self.channel_axis)
-            output = self.layers(feature_map)
-            return self.last_layer(output)
+            output = self.last_layer(self.layers(feature_map))
+            return F.softmax(output, dim=1)

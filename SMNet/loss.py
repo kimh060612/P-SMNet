@@ -43,21 +43,23 @@ class AuxSemmapLoss(nn.Module):
         return loss
 
 class PSEMMapLoss(nn.Module):
-    def __init__(self, beta=10.0):
+    def __init__(self, beta=1.0):
         super(PSEMMapLoss, self).__init__()
-        self.criterion = nn.BCEWithLogitsLoss(size_average = False, reduce=False, reduction=None)
+        self.criterion = nn.CrossEntropyLoss(reduce=False, reduction=None)
         self.beta = beta
-        
+    
     def forward(self, map_gt, mask, recon_sample, posterior_l, prior_l, val=False):
         if not val:
             mask = mask.float()
             kl_loss = kl.kl_divergence(posterior_l, prior_l)
-            recon_loss = self.criterion(input=recon_sample, target=map_gt)
-            reconstruction_loss = torch.mean(torch.mul(recon_loss, mask))
-            return -(reconstruction_loss + self.beta * kl_loss)
+            recon_loss = self.criterion(recon_sample, map_gt)
+            reconstruction_loss = torch.mul(recon_loss, mask)
+            reconstruction_loss = reconstruction_loss.sum()/mask.sum()
+            # print(reconstruction_loss)
+            return reconstruction_loss + self.beta * kl_loss
         else:
             mask = mask.float()
-            loss = self.loss(recon_sample, map_gt)
+            loss = self.criterion(recon_sample, map_gt)
             loss = torch.mul(loss, mask)
             # -- mask is assumed to have a least one value
             loss = loss.sum()/mask.sum()

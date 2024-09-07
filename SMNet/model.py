@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from SMNet.probabilistic_net import AxisAlignedConvGaussian, Fcomb
+from SMNet.probabilistic_net import AxisAlignedGaussian, Fcomb
+from SMNet.unet import UNet
 
 class PSMNet(nn.Module):
     def __init__(self, cfg, device):
@@ -44,8 +45,8 @@ class PSMNet(nn.Module):
         else:
             raise Exception('{} memory update not supported.'.format(mem_update))
 
-        self.input_channels = ego_feat_dim
-        self.num_classes = cfg['n_obj_classes']
+        self.input_channels = mem_feat_dim
+        self.num_classes = n_obj_classes
         self.num_filters = [32,64,128,192]
         self.latent_dim = 6
         self.no_convs_per_block = 3
@@ -54,11 +55,11 @@ class PSMNet(nn.Module):
         self.beta = 10.
         self.z_prior_sample = 0
         self.initializers = {'w':'he_normal', 'b':'normal'}
-        self.prior = AxisAlignedConvGaussian(self.input_channels, self.num_filters, self.no_convs_per_block, self.latent_dim,  self.initializers,).to(device)
-        self.posterior = AxisAlignedConvGaussian(self.input_channels, self.num_filters, self.no_convs_per_block, self.latent_dim, self.initializers, posterior=True).to(device)
+        self.prior = AxisAlignedGaussian(self.input_channels, self.num_filters, self.no_convs_per_block, self.latent_dim,  self.initializers, self.num_classes).to(device)
+        self.posterior = AxisAlignedGaussian(self.input_channels, self.num_filters, self.no_convs_per_block, self.latent_dim, self.initializers, self.num_classes, posterior=True).to(device)
         self.fcomb = Fcomb(self.num_filters, self.latent_dim, self.input_channels, self.num_classes, self.no_convs_fcomb, {'w':'orthogonal', 'b':'normal'}, use_tile=True).to(device)
 
-        self.decoder = SemmapDecoder(mem_feat_dim, n_obj_classes)
+        self.unet = UNet(self.mem_feat_dim, self.num_classes, self.num_filters, self.initializers , apply_last_layer=False, padding=True).to(device)
 
 
     def weights_init(self, m):
@@ -160,41 +161,38 @@ class PSMNet(nn.Module):
 
         return memory, observed_masks
 
-    def prior_samples(self, features):
-        _, T, _, _, _ = features.shape
-        feat_prior_samples = []
-        for t in range(T):
-            feature = features[:, t, ...]
-            sample = self.prior.forward(feature).unsqueeze(1)
-            feat_prior_samples.append(sample)
-        return torch.mean(torch.cat(feat_prior_samples, dim=1), dim=1)
+    def prior_samples(self, map_state):
+        sample = self.prior.forward(map_state)
+        return sample
     
-    def posterior_sample(self, features, gt_maps):
-        _, T, _, _, _ = features.shape
-        feat_posterior_samples = []
-        for t in range(T):
-            feature = features[:, t, ...]
-            gt_map = gt_maps[:, t, ...]
-            sample = self.posterior(feature, gt_map).sample().unsqueeze(1)
-            feat_posterior_samples.append(sample)
-        return torch.mean(torch.cat(feat_posterior_samples, dim=1), dim=1)
+    def posterior_sample(self, map_state, gt_map):
+        gt_map = self.one_hot_encoding(gt_map)
+        # print(map_state.shape, gt_map.shape)
+        sample = self.posterior.forward(map_state, gt_map)
+        return sample
         
     def sample(self, map_memory, latent_space):
-        return self.fcomb.forward(map_memory, latent_space)
+        return self.fcomb.forward(map_memory, latent_space.sample())
+    
+    def one_hot_encoding(self, gt_map):
+        return F.one_hot(gt_map, num_classes=self.num_classes).permute(0, 3, 1, 2)
     
     def forward(self, features, proj_indices, masks_inliers, gt_segmap, training=True):
         
         if training:
-            posterior_latent_space = self.posterior_sample(features, gt_segmap)
-            prior_latent_space = self.prior_samples(features)
             memory, observed_masks = self.encode(features, proj_indices, masks_inliers)
-            semmap = self.decoder(memory)
+            posterior_latent_space = self.posterior_sample(memory, gt_segmap)
+            prior_latent_space = self.prior_samples(memory)
+            semmap = self.unet(memory, False)
 
-            return self.sample(semmap, prior_latent_space), observed_masks, self.sample(semmap, posterior_latent_space), posterior_latent_space, prior_latent_space
+            return self.sample(semmap, prior_latent_space), \
+                observed_masks, self.sample(semmap, posterior_latent_space), \
+                posterior_latent_space, \
+                prior_latent_space
         else:
-            prior_latent_space = self.prior_samples(features)
             memory, observed_masks = self.encode(features, proj_indices, masks_inliers)
-            semmap = self.decoder(memory)
+            prior_latent_space = self.prior_samples(memory)
+            semmap = self.unet(memory, False)
 
             return self.sample(semmap, prior_latent_space), observed_masks
 
@@ -626,3 +624,47 @@ class SemmapDecoder(nn.Module):
 
 
 
+    # def _project_t(self, feature, proj_index, mask_inliers):
+    #     N, _, _, _ = feature.shape
+    #     m = (proj_index >= 0)    # -- (N, 250*250)
+    #     if self.mem_update == 'lstm':
+    #         state = (torch.zeros((N * 250 * 250, self.mem_feat_dim), dtype=torch.float, device=self.device_mem),
+    #                  torch.zeros((N * 250 * 250, self.mem_feat_dim), dtype=torch.float, device=self.device_mem))
+    #     elif self.mem_update == 'gru':
+    #         state = torch.zeros((N * 250 * 250, self.mem_feat_dim), dtype=torch.float, device=self.device_mem)
+    #     elif self.mem_update == 'replace':
+    #         state = torch.zeros((N * 250 * 250, self.mem_feat_dim), dtype=torch.float, device=self.device_mem)
+        
+    #     if m.any():
+    #         feature = F.interpolate(feature, size=(480, 640), mode="bilinear", align_corners=True)
+    #         if self.ego_downsample:
+    #             feature = feature[:,:,::4,::4]
+
+    #         feature = feature.permute(0,2,3,1)  # -- (N,H,W,512)
+
+    #         feature = feature[mask_inliers, :]
+    #         tmp_memory = feature[proj_index[m], :]
+
+    #         tmp_top_down_mask = m.view(-1)
+
+    #         if self.mem_update == 'lstm':
+    #             tmp_state = (state[0][tmp_top_down_mask,:].to(self.device),
+    #                             state[1][tmp_top_down_mask,:].to(self.device))
+
+    #             tmp_state = self.rnn(tmp_memory, tmp_state)
+
+    #             state[0][tmp_top_down_mask,:] = tmp_state[0].to(self.device_mem)
+    #             state[1][tmp_top_down_mask,:] = tmp_state[1].to(self.device_mem)
+
+    #         elif self.mem_update == 'gru':
+    #             tmp_state = state[tmp_top_down_mask,:].to(self.device)
+
+    #             tmp_state = self.rnn(tmp_memory, tmp_state)
+    #             state[tmp_top_down_mask,:] = tmp_state.to(self.device_mem)
+    #         elif self.mem_update == 'replace':
+    #             tmp_memory = self.linlayer(tmp_memory)
+    #             state[tmp_top_down_mask,:] = tmp_memory.to(self.device_mem)
+    #         else:
+    #             raise NotImplementedError
+            
+    #     return state.view(N, 250, 250, self.mem_feat_dim)

@@ -36,7 +36,7 @@ label_colours = [(0,0,0),
                  (30, 55, 153),  # plant
                  (24, 220, 255), #(56, 173, 169),    # counter
                  (234, 32, 39),  #sink
-]
+] # 249, 221 79
 
 
 def color_label(label):

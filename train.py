@@ -18,7 +18,7 @@ from torch.utils.data import DistributedSampler
 
 from SMNet.loader import SMNetLoader, PSMNetLoader
 from SMNet.model import SMNet, PSMNet, AuxSMNet
-from SMNet.loss import SemmapLoss, PSEMMapLoss, AuxSemmapLoss, l2_regularisation
+from SMNet.loss import SemmapLoss, PSEMMapLoss, AuxSemmapLoss
 from metric import averageMeter
 from metric.iou import IoU
 from SMNet.smnet_utils import get_logger
@@ -188,8 +188,6 @@ def train_auxsmnet(rank, world_size, cfg):
             if observed_masks.any():
 
                 loss = loss_fn(semmap_gt.to(device), semmap_pred, observed_masks)
-                # loss += l2_regularisation(model.decoder) + l2_regularisation(model.rnn)
-
                 loss.backward()
 
                 optimizer.step()
@@ -401,7 +399,7 @@ def train_psmnet(rank, world_size, cfg):
     )
 
     # Setup Model
-    model = PSMNetLoader(cfg['model'], device)
+    model = PSMNet(cfg['model'], device)
     model.apply(model.weights_init)
     model = model.to(device)
 
@@ -496,20 +494,15 @@ def train_psmnet(rank, world_size, cfg):
             start_ts = time.time()
 
             features, masks_inliers, proj_indices, semmap_gt, _ = batch
-
             model.train()
 
             optimizer.zero_grad()
             semmap_sampled, observed_masks, sampled_map, poster_dist, prior_dist = model(features, proj_indices, masks_inliers, semmap_gt, training=True)
-
+            
             if observed_masks.any():
-
                 loss = loss_fn(semmap_gt.to(device), observed_masks, sampled_map, poster_dist, prior_dist)
-                reg_loss = l2_regularisation(model.posterior) + l2_regularisation(model.prior) + l2_regularisation(model.fcomb.layers)
-                loss = loss + 1e-5 * reg_loss
-                
                 loss.backward()
-
+                torch.nn.utils.clip_grad.clip_grad_value_(model.parameters(), clip_value=1.0)
                 optimizer.step()
 
                 semmap_sampled = semmap_sampled.permute(0,2,3,1)
@@ -822,8 +815,6 @@ def train_smnet(rank, world_size, cfg):
             if observed_masks.any():
 
                 loss = loss_fn(semmap_gt.to(device), semmap_pred, observed_masks)
-                # loss += l2_regularisation(model.decoder) + l2_regularisation(model.rnn)
-
                 loss.backward()
 
                 optimizer.step()
