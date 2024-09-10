@@ -51,7 +51,7 @@ class PSEMMapLoss(nn.Module):
     def forward(self, map_gt, mask, recon_sample, posterior_l, prior_l, val=False):
         if not val:
             mask = mask.float()
-            kl_loss = kl.kl_divergence(posterior_l, prior_l)
+            kl_loss = torch.mean(kl.kl_divergence(posterior_l, prior_l))
             recon_loss = self.criterion(recon_sample, map_gt)
             reconstruction_loss = torch.mul(recon_loss, mask)
             reconstruction_loss = reconstruction_loss.sum()/mask.sum()
