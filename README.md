@@ -1,16 +1,9 @@
-# Semantic-MapNet
+# Fine-Structured Learning for Semantic Map Representation
 
 Code for the paper:
 
-**[Semantic MapNet: Building Allocentric Semantic Maps and Representations from Egocentric Views][1]**
-*Vincent Cartillier, Zhile Ren, Neha Jain, Stefan Lee, Irfan Essa, Dhruv Batra*
-
-
-Website: [smnet.com][2]
-
-<p align="center">
-  <img src='res/img/smnet.png' alt="teaser figure" width="100%"/>
-</p>
+**[Fine-Structured Learning for Semantic Map Representation]**
+*GiHyeon Kim, DongHyeong Kim, HyeonJeong Lim, MyeongAh Cho*
 
 ## Install
 The code is tested with Ubuntu 16.04, Python 3.6, Pytorch v1.4+.
@@ -47,7 +40,7 @@ run the following script for demo:
         python precompute_training_inputs/build_projindices.py
 
 
- * To train SMNet you can run ```train.py```
+ * To train P-SMNet you can run ```train.py```
  * Precompute testing features and projections indices for the full tours in the test set:
 
 
@@ -55,48 +48,21 @@ run the following script for demo:
         python precompute_test_inputs/build_test_data_features.py
 
 
- * To evaluate SMNet you can run ```test.py``` and:
+ * To evaluate P-SMNet you can run ```test.py``` and:
 
         python eval/eval.py
         python eval/eval_bfscore.py
-
-
-## Pre-trained models
- * pretrained weights are available here: https://drive.google.com/file/d/1KsJoTs91ez2bR35wW1VlD8jBG_gB-k7a/view?usp=sharing
- * pretrained weights for RedNet are available here: https://drive.google.com/file/d/1PZDwl6dmIl6bhmWG42aRGyghgQQWTOcz/view?usp=sharing
-
-
-## Object-Goal Navigation
- * Download the [ObjectNav-Challenge-data](https://github.com/facebookresearch/habitat-lab) and place it under: ```data/ObjectNav/objectnav_mp3d_v1/val/```
- * Download the precomputed topdown semantic map predictions here: https://drive.google.com/file/d/1wPtJaoDO15OtPcWcXuAbCtGQ3r-MdQM2/view?usp=sharing and place them in ```data/ObjectNav/semmap/```
- * Download the precomputed ObjNav GT goals here: https://drive.google.com/file/d/1Y6Qb6eGryZNkbjWGiqQJE2k-zV0aArrd/view?usp=sharing and place the json file in ```data/ObjectNav/```
- * You can recompute the semantic predictions using the explorations paths in ```data/ObjectNav/paths.json``` and the ```test.py``` script.
- * Compute the freespace maps:
-
-        python ObjectNav/build_freespace_maps.py
-
- * Run A* path planning:
-
-        python ObjectNav/run_astar_planning.py
-
-
-## Replica
- * You can find the manually generated path related to the replica experiment at ```data_replica/paths.json```
-
 
 ## Citation
 
 If you find our work useful in your research, please consider citing:
 
-    @article{cartillier2020semantic,
-      title={Semantic MapNet: Building Allocentric SemanticMaps and Representations from Egocentric Views},
-      author={Cartillier, Vincent and Ren, Zhile and Jain, Neha and Lee, Stefan and Essa, Irfan and Batra, Dhruv},
-      journal={arXiv preprint arXiv:2010.01191},
-      year={2020}
-    }
+  @inproceedings{kim2024fine,
+    title={Fine-Structured Learning for Semantic Map Representation},
+    author={Kim, GiHyeon and Kim, Donghyeong and Lim, Hyeonjeong and Cho, MyeongAh},
+    booktitle={2024 IEEE International Conference on Consumer Electronics-Asia (ICCE-Asia)},
+    pages={1--3},
+    year={2024},
+    organization={IEEE}
+  }
 
-## License
-BSD
-
-[1]: https://arxiv.org/abs/2010.01191
-[2]: https://vincentcartillier.github.io/smnet.html
